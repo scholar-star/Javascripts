@@ -1,0 +1,17 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <title>form.html</title>
+        <meta charset="utf-8">
+    </head>
+    <body>
+        <form action="http://localhost:3000/process_create" method="post"> <!--주소 변경, 해당 주소에서 처리 결과를 보여줌.-->
+            <!--post : query String에 정보 표시 X-->
+            <p><input type="text" name="title"></p> <!--한 줄 입력-->
+            <p>
+                <textarea name="description"></textarea> <!--여러 줄 입력-->
+            </p>
+            <p><input type="submit"></p> <!--서버로 제출 버튼-->
+        </form>
+    </body>
+</html>

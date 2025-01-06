@@ -1,0 +1,30 @@
+<!DOCTYPE html>
+<html>
+    <body>
+        <p>Click the button to display subway information.</p>
+
+        <button onclick="displayResponse()">The stations are....</button>
+
+        <script>
+            function displayDate() {
+                document.getElementById("demo").innerHTML = Date();
+            }
+            
+            function displayResponse() {
+                var xhr = new XMLHttpRequest();
+                xhr.withCredentials = true;
+
+                xhr.addEventListener("readystatechange", function() {
+                if(this.readyState === 4) {
+                    console.log(this.responseText);
+                    document.getElementById("demo").innerHTML = this.responseText;
+                }
+                });
+
+                xhr.open("GET", "http://localhost:3000/webapi");
+                xhr.send()
+            }
+        </script>
+        <p id="demo"></p>
+    </body>
+</html>

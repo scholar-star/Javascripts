@@ -1,0 +1,30 @@
+<!DOCTYPE html>
+<html>
+    <body>
+        <p>Click the button to display subway information.</p>
+
+        <button onclick="displayResponse()">The stations are....</button>
+
+        <script>
+            function displayDate() {
+                document.getElementById("demo").innerHTML = Date();
+            }
+            
+            function displayResponse() {
+                var xhr = new XMLHttpRequest();
+                xhr.withCredentials = true;
+
+                xhr.addEventListener("readystatechange", function() {
+                if(this.readyState === 4) {
+                    console.log(this.responseText);
+                }
+                });
+
+                xhr.open("GET", "https://api.odcloud.kr/api/15041101/v1/uddi:209f5216-4ff3-420c-a737-d1eaf534e14f?page=1&perPage=20&serviceKey=4iA7WACtbuMvl7qskilXkYKrykO5YurZUOnVBf1YczV%2BeKSAE1kbx7tqRGt2DZk21IhpnE80lnbTEKRCJ3CWOA%3D%3D&returnType=XML");
+
+                xhr.send()
+            }
+        </script>
+        <p id="demo"></p>
+    </body>
+</html>

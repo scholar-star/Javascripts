@@ -35,7 +35,7 @@ var app = http.createServer(function(request, response) {
     //response.writeHead(200);
     if(pathname=='/') {
         if(queryData.id === undefined) {
-            fs.readdir('./data', function(err, filelist) {
+            fs.readdir('./public', function(err, filelist) {
                 //console.log(filelist);
                 var title = 'Welcome';
                 var description = 'Hello, Node.js';
@@ -51,7 +51,7 @@ var app = http.createServer(function(request, response) {
                 response.end(template); // template 문자열로 응답 
             });
         } else {
-            fs.readdir('./data', function(err, filelist) {
+            fs.readdir('./public', function(err, filelist) {
                 var list = '<ul>';
                 var i = 0;
                 while(i < filelist.length) {
