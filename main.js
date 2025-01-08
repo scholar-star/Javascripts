@@ -1,6 +1,8 @@
 var http = require('http');
 var fs = require('fs');
 var url = require('url');
+var qs = require('querystring'); // querystring module
+
 const path = require('path');
 
 function templateList(filelist) {
@@ -46,7 +48,7 @@ var app = http.createServer(function(request, response) {
     //     // header에 404 표시
     // }
     //response.writeHead(200);
-    if(pathname=='/') {
+    if(pathname==='/') {
         if(queryData.id === undefined) {
             fs.readdir('./public', function(err, filelist) {
                 //console.log(filelist);
@@ -68,7 +70,7 @@ var app = http.createServer(function(request, response) {
                 });
             });
         } 
-    } else if(pathname=="/create") { // localhost:3000/create
+    } else if(pathname==="/create") { // localhost:3000/create
         fs.readdir('./public',function(error, filelist) {
             var title = "Welcome";
             var list = templateList(filelist); // placeholder : 입력의 가이드라인
@@ -85,6 +87,20 @@ var app = http.createServer(function(request, response) {
             `);
             response.writeHead(200);
             response.end(template);
+        });
+    }
+    else if(pathname==="/create_process") {
+        var body = '';
+        request.on('data', function(data) {
+            body = body + data;
+        });
+        request.on('end', function() { // event listen, callback 함수 작동
+            var post = qs.parse(body);
+            var title = post.title;
+            var description = post.description;
+            console.log(title);
+            console.log(description);
+            //console.log(post); // querystring을 개별로 parsing
         });
     }
     else {

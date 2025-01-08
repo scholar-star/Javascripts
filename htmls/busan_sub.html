@@ -7,25 +7,25 @@
     <body>
         <h1>현재 위치의 구와 동을 입력하세요.</h1>
         <hr>
-        <form action="../busan_subway.js">
+        <form>
             부산광역시 
             <input type="text" name="distinct">
             <input type="text" name="unit">
-            <button onclick="posting()">검색</button>
+            <button onclick="getOn()" type="submit">제출</button>
+            <!--button으로 form에 대한 제출 가능(type submit)-->
         </form>
+        <table id="stations"></table>
         <script>
-            function posting() {
-                const requestOptions = {
-                method: "GET",
-                redirect: "follow"
-                };
-
-                fetch("https://api.odcloud.kr/api/15041101/v1/uddi:0b0d9485-641f-4595-a8c6-c5a87a0ef14e?page=1&serviceKey=4iA7WACtbuMvl7qskilXkYKrykO5YurZUOnVBf1YczV%2BeKSAE1kbx7tqRGt2DZk21IhpnE80lnbTEKRCJ3CWOA%3D%3D&perPage=115", requestOptions)
-                .then((response) => response.text())
-                .then((result) => console.log(result))
-                .catch((error) => console.error(error));
+            function getOn() {
+                var xhr = new XMLHttpRequest();
+                xhr.addEventListener("readystatechange", function() {
+                    if(this.readyState === 4) {
+                        console.log(this.responseText);
+                    }
+                });
+                xhr.open("GET", "http://localhost:3000/subway");
+                xhr.send();
             }
         </script>
-        <table id="stations"></table>
     </body>
 </html>
