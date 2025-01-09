@@ -16,7 +16,7 @@ function templateList(filelist) {
     return list;
 }
 
-function templateHTML(title, list, body) {
+function templateHTML(title, list, body, control) {
     return `
     <!doctype html>
     <html>
@@ -27,7 +27,7 @@ function templateHTML(title, list, body) {
         <body>
             <h1><a href="/">WEB</a></h1>
             ${list}
-            <a href="/create">create</a>
+            ${control}
             ${body}
         </body>
     </html>
@@ -50,28 +50,33 @@ var app = http.createServer(function(request, response) {
     //response.writeHead(200);
     if(pathname==='/') {
         if(queryData.id === undefined) {
-            fs.readdir('./public', function(err, filelist) {
+            fs.readdir('./data', function(err, filelist) {
                 //console.log(filelist);
                 var title = 'Welcome';
                 var description = 'Hello, Node.js';
                 var list = templateList(filelist);
-                var template = templateHTML(title, list, `<h2>${title}</h2><p>${description}</p>`);
+                var template = templateHTML(title, list, 
+                    `<h2>${title}</h2><p>${description}</p>`,
+                `<a href="/create">create</a>`);
                 response.writeHead(200);
                 response.end(template); // template 문자열로 응답 
             });
         } else {
-            fs.readdir('./public', function(err, filelist) {
+            fs.readdir('./data', function(err, filelist) {
                 fs.readFile(`./data/${queryData.id}`, 'utf8', function(err, description) {
+                    // 이곳에서 페이지를 개략적으로 만든 상태에서 redirection.
                     var title = queryData.id;
                     var list = templateList(filelist);
-                    var template = templateHTML(title, list, `<h2>${title}</h2><p>${description}</p>`);
+                    var template = templateHTML(title, list, `
+                        <h2>${title}</h2><p>${description}</p>`,
+                        `<a href="/create">create</a> <a href="/update?id=${title}">update</a>`);
                     response.writeHead(200);
                     response.end(template);
                 });
             });
         } 
     } else if(pathname==="/create") { // localhost:3000/create
-        fs.readdir('./public',function(error, filelist) {
+        fs.readdir('./data',function(error, filelist) {
             var title = "Welcome";
             var list = templateList(filelist); // placeholder : 입력의 가이드라인
             var template = templateHTML(title, list, `
@@ -84,7 +89,7 @@ var app = http.createServer(function(request, response) {
                     <input type="submit">
                 </p>
             </form>    
-            `);
+            `,'');
             response.writeHead(200);
             response.end(template);
         });
@@ -98,9 +103,34 @@ var app = http.createServer(function(request, response) {
             var post = qs.parse(body);
             var title = post.title;
             var description = post.description;
-            console.log(title);
-            console.log(description);
+            fs.writeFile(`./data/${title}`, description, 'utf8', function(err) {
+                //response.writeHead(200);
+                // 리다이렉션
+                response.writeHead(302, {Location: `/?id=${title}`});
+                // 302 redirection(임시 이동)과 id가 title인 location으로 redirect 
+                response.end();
+            });
             //console.log(post); // querystring을 개별로 parsing
+        });
+    }
+    else if(pathname==="/update") {
+        fs.readdir('./data', function(error, filelist) {
+            fs.readFile(`./data/${queryData.id}`,'utf8',function(err, description) {
+                var title = queryData.id;
+                var list = templateList(filelist); // list -> HTML로 template화
+                var template = templateHTML(title, list, // hidden : 수정 못하도록 숨기는 기능 
+                    `
+                    <form action="/update_process" method="post">
+                        <input type="hidden" name="id" value="${title}">
+                        <p><input type="text" name="title" placeholder="title" value=${title}></p>
+                        <p><textarea name="description" placeholder="description">${description}</textarea></p>
+                        <p><input type="submit"></p>
+                    </form>
+                    `
+                ,`<a href="/create>create</a> <a href="/update?id=${title}>update</a>`);
+                response.writeHead(200);
+                response.end(template);
+            });
         });
     }
     else {
