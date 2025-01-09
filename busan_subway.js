@@ -12,9 +12,12 @@ app.get("/subway", function (req, res) {
     };
     request(options, function(error, response) {
         if (error) throw new Error(error);
-        console.log(response.body);
+        var jsondata = JSON.parse(response.body);
+        var subarray = jsondata.data;
+        console.log(subarray);
+        // javascript 객체로 분할 완료
         res.send(response.body);
-    })
+    });
 });
 
 app.listen(port, function() {
