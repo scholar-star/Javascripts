@@ -9,8 +9,8 @@
         <hr>
         <form>
             부산광역시 
-            <input type="text" name="distinct">
-            <input type="text" name="unit">
+            <input type="text" name="distinct" id="distinct" placeholder="구/군">
+            <input type="text" name="unit" id="unit" placeholder="동/면">
             <button onclick="getOn()" type="submit">제출</button>
             <!--button으로 form에 대한 제출 가능(type submit)-->
         </form>
@@ -23,7 +23,11 @@
                         console.log(this.responseText);
                     }
                 });
-                xhr.open("GET", "http://localhost:3000/subway");
+                const params = new URLSearchParams();
+                params.append('distinct', document.getElementById("distinct").value);
+                params.append('unit', document.getElementById("unit").value);
+                console.log(params.toString());
+                xhr.open("GET", "http://localhost:3000/subway?"+params.toString());
                 xhr.send();
             }
         </script>
