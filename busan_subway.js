@@ -16,7 +16,6 @@ app.get("/subway", function (req, res) {
     request(options, function(error, response) {
         if (error) throw new Error(error);
         var sub_url = req.url;
-        console.log(sub_url);
         var queryData = url.parse(sub_url,true).query;
         var distinct = queryData.distinct;
         var unit = queryData.unit;
@@ -37,8 +36,6 @@ app.get("/subway", function (req, res) {
 
         // DB -> 정규식을 이용해 queryString으로 검색, response body에 붙이기
         // 전략으로 수정
-        console.log(distinct);
-        console.log(unit);
         var near_stas = [];
         subarray.forEach(function(sub) {
             var roadadd = sub["도로명주소"];
@@ -65,9 +62,10 @@ app.get("/subway", function (req, res) {
         // 모두 모은 배열 형태로 중괄호 객체 형태로 저장
         all = JSON.stringify(all);
         // JSON 객체로 변환
-        console.log(all);
+        //console.log(all);
         // 테스트. 잘 작동한다.
-        res.send(response.body);
+        res.send(all);
+        // 이것을 요청했던 쪽으로 보낸다.
     });
 });
 
