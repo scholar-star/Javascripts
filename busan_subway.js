@@ -47,22 +47,21 @@ app.get("/subway", function (req, res) {
             // indexOf로 지번주소에 포함되어 있는지 확인(구와 동 모두)
             if(address.indexOf(distinct)!=-1 && address.indexOf(unit)!=-1) {
                 var nears = {
-                    "road" : `${roadadd}`,
-                    "line_num" : `${line}`,
-                    "sta_name" : `${station}`,
-                    "addr" : `${address}`,
-                    "manager" : `${oper}`
-                };
+                    road : roadadd,
+                    line_num : line,
+                    sta_name : station,
+                    addr : address,
+                    manager : oper
+                }; 
                 // 찾은 역에 대한 정보들을 JSON에 가까운 중괄호 객체 형태로 저장.
                 // 이는 배열 near_sta에 모두 집어넣는다.
                 near_stas.push(nears);
             }
         });
-        var all = {"nearbys":near_stas};
+        var all = {nearbys:near_stas};
         // 모두 모은 배열 형태로 중괄호 객체 형태로 저장
-        all = JSON.stringify(all);
         // JSON 객체로 변환
-        //console.log(all);
+        // console.log(all);
         // 테스트. 잘 작동한다.
         res.send(all);
         // 이것을 요청했던 쪽으로 보낸다.
