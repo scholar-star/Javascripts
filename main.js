@@ -1,21 +1,17 @@
 console.log('Hello no deamon');
 var http = require('http');
-var fs = require('fs');
+//var fs = require('fs');
 var url = require('url');
 var qs = require('querystring');
 var template = require('./lib/template.js');
-var path = require('path');
-var sanitizeHtml = require('sanitize-html');
-var mysql = require('mysql');
+//var path = require('path');
+//var sanitizeHtml = require('sanitize-html');
+//var mysql = require('mysql');
 // mysql library 추가
-
-var db = mysql.createConnection({
-    host:'localhost',
-    user:'root',
-    password:'4221',
-    database:'opentutorials'
-});
+var db = require('./lib/db.js');
+var topic = require('./lib/topic.js');
 // 데이터베이스 연결
+var author = require('./lib/author.js');
 
 var app = http.createServer(function(request, response) {
     var _url = request.url;
@@ -35,20 +31,7 @@ var app = http.createServer(function(request, response) {
             //     response.writeHead(200);
             //     response.end(html);
             // });
-            db.query(`SELECT * FROM topic`, function(error, topics) {
-                // console.log(topics);
-                // response.writeHead(200);
-                // response.end('Success');
-                var title = "Welcome";
-                var description = "Hello, Node.js";
-                var list = template.list(topics);
-                var html = template.HTML(title, list, 
-                    `<h2>${title}</h2>
-                    ${description}`, `<a href="/create">create</a>`
-                );
-                response.writeHead(200);
-                response.end(html);
-            }); // db.query(질의, 콜백함수(에러, 처리결과))
+            topic.home(request, response); // exports.home 사용
         } else {
             // fs.readdir('./data', function(error, filelist) {
             //     var filteredId = path.parse(queryData.id).base;
@@ -72,33 +55,7 @@ var app = http.createServer(function(request, response) {
             //         response.end(html);
             //     });
             // });
-            db.query(`SELECT * FROM topic`, function(error, topics) {
-                if(error) {
-                    throw error;
-                }
-                db.query(`SELECT * FROM topic WHERE id=?`,[queryData.id], function(error2, topic) {
-                    // ?에 넣는 코드는 정제됨(공격 의도 코드를 방어)
-                    if(error2) {
-                        throw error2;
-                    }
-                    //console.log(topic[0].title);
-                    var title = topic[0].title;
-                    var description = topic[0].description;
-                    var list = template.list(topics);
-                    var html = template.HTML(title, list, 
-                        `<h2>${title}</h2>
-                        ${description}`, `<a href="/create">create</a>
-                        <a href="/update?id=${queryData.id}">update</a>
-                        <form action="delete_process" method="post">
-                            <input type="hidden" name="id" value=${queryData.id}> 
-                            <input type="submit" value="delete">
-                        </form>`
-                        // queryData.id : sql에서 방어됨
-                    );
-                    response.writeHead(200);
-                    response.end(html);
-                }); 
-            })
+            topic.page(request, response); // exports.page 사용
         }
     } else if(pathname === '/create') {
         // fs.readdir('./data', function(error, filelist) {
@@ -118,46 +75,9 @@ var app = http.createServer(function(request, response) {
         //     response.writeHead(200);
         //     response.end(html);
         // });
-        db.query(`SELECT * FROM topic`, function(error, topics) {
-            var title = 'Create';
-            var list = template.list(topics);
-            var html = template.HTML(title, list,
-                `
-                <form action="/create_process" method="post">
-                    <p><input type="text" name="title" placeholder="title"></p>
-                    <p>
-                        <textarea name="description" placeholder="description"></textarea>
-                    </p>
-                    <p><input type="submit">
-                </form>`,
-                `<a href="/create">create</a>`
-            );
-            response.writeHead(200);
-            response.end(html);
-        });
+        topic.create(request, response); // exports.create 사용
     } else if(pathname === '/create_process') {
-        var body = '';
-        request.on('data', function(data) {
-            body = body + data;
-        });
-        request.on('end', function() {
-            var post = qs.parse(body);
-            // var title = post.title;
-            // var description = post.description;
-            // fs.writeFile(`data/${title}`, description, 'utf8', function(err) {
-            //     response.writeHead(302, {Location: `/?id=${title}`});
-            //     response.end();
-            // });
-            db.query(`INSERT INTO topic (title, description, created, author_id)
-                VALUES (?, ?, NOW(), ?)`,[post.title, post.description,1],
-            function(error, result) {
-                if(error) {
-                    throw error;
-                }
-                response.writeHead(302, {Location:`/?id=${result.insertId}`}); // 추가된 id
-                response.end();
-            })
-        });
+        topic.create_process(request, response); // exports.create_process
     } else if(pathname === '/update') {
         //fs.readdir('./data', function(error, filelist) {
             //var filteredId = path.parse(queryData.id).base;
@@ -182,70 +102,22 @@ var app = http.createServer(function(request, response) {
             //     response.writeHead(200);
             //     response.end(html);
             // });
-            db.query(`SELECT * FROM topic`, function(error, topics) {
-                if(error) {
-                    throw error;
-                }
-                db.query(`SELECT * FROM topic WHERE id=?`,[queryData.id], function(error2, topic){
-                    if(error2) {
-                        throw error;
-                    }
-                    var list = template.list(topics);
-                    var html = template.HTML(topic[0].title, list, // input value = "들어가 있는 값"
-                        `<form action="/update_process" method="post">
-                            <input type="hidden" name="id" value=${topic[0].id}>
-                            <p><input type="text" name="title" placeholder="title" value=${topic[0].title}></p>
-                            <p><textarea name="description" placeholder="description">${topic[0].description}</textarea>
-                            <p><input type="submit"></p>
-                        </form>`, `<a href="/create">create</a> <a href="/update?id=${topic[0].id}">update</a>`
-                    );
-                    response.writeHead(200);
-                    response.end(html);
-                });
-            });
+            topic.update(request, response);
         }
      else if(pathname === '/update_process') {
-        var body = '';
-        request.on('data', function(data) {
-            body = body + data;
-        });
-        request.on('end', function() {
-            var post = qs.parse(body);
-            // var id = post.id;
-            // var title = post.title;
-            // var description = post.description;
-            // fs.rename(`data/${id}`, `data/${title}`, function(error) {
-            //     fs.writeFile(`data/${title}`, description, 'utf8', function(err) {
-            //         response.writeHead(302, {Location: `/?id=${title}`});
-            //         response.end();
-            //     });
-            // });
-            db.query('UPDATE topic SET title=?, description=?, author_id=1 WHERE id=?',[post.title, post.description, post.id],
-                // update table set col1=val1... where 조건
-                function(error, result) {
-                    // if(error) {
-                    //     throw error;
-                    // }
-                    response.writeHead(302, {Location:`/?id=${post.id}`});
-                    // 리다이렉션 - end
-                    response.end();
-                }
-            );
-        });
+        topic.update_process(request, response);
     } else if(pathname === '/delete_process') {
-        var body = '';
-        request.on('data', function(data) {
-            body = body + data;
-        });
-        request.on('end', function() {
-            var post = qs.parse(body);
-            var id = post.id;
-            var filteredId = path.parse(id).base;
-            fs.unlink(`data/${filteredId}`, function(error) {
-                response.writeHead(302, {Location: `/`});
-                response.end();
-            });
-        });
+        topic.delete_process(request, response);
+    } else if(pathname === '/author') {
+        author.home(request, response);
+    } else if(pathname === '/author/create_process') {
+        author.create_process(request, response);
+    } else if(pathname === '/author/update') {
+        author.update(request, response);   
+    } else if(pathname === '/author/update_process') {
+        author.update_process(request, response);
+    } else if(pathname === '/author/delete_process') {
+        author.delete_process(request, response);
     } else {
         response.writeHead(404);
         response.end('Not found');
