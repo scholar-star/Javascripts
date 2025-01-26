@@ -16,11 +16,11 @@ module.exports = {
         </html>
         `;
     },
-    list:function(topics) {
+    list:function(filelist) {
         var list = '<ul>';
         var i = 0;
-        while(i < topics.length) { // topic : 개별 객체(프로퍼티로 지정 가능)
-            list = list + `<li><a href="/?id=${topics[i].id}">${topics[i].title}</a></li>`; // database id로 구분자 지정
+        while(i < filelist.length) {
+            list = list + `<li><a href="/topic/${filelist[i]}">${filelist[i]}</a></li>`;
             i = i + 1;
         }
         list = list+'</ul>';
